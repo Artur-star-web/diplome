@@ -19,6 +19,18 @@ android {
         targetSdkVersion 32
         versionCode 14
         versionName "1.0.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunnerArguments clearPackageData: 'true'
+    }
+
+    testOptions {
+        animationsDisabled = true
+
+        unitTests {
+            includeAndroidResources = true
+            returnDefaultValues = true
+        }
     }
 
     compileOptions {
@@ -91,4 +103,70 @@ dependencies {
     implementation platform('com.google.firebase:firebase-bom:29.0.3')
     implementation 'com.google.firebase:firebase-analytics-ktx'
     implementation 'com.google.firebase:firebase-crashlytics-ktx'
+
+    // Тестирование
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-intents:3.5.1'
+    androidTestImplementation 'androidx.test:runner:1.5.2'
+    androidTestImplementation 'androidx.test:rules:1.5.2'
+
+    // Allure для отчетов
+    androidTestImplementation 'io.qameta.allure:allure-kotlin-android:2.4.0'
+    androidTestImplementation 'io.qameta.allure:allure-kotlin-model:2.4.0'
+
+    // Для скриншотов при падениях
+    //androidTestImplementation 'com.github.ashqal:MD5TestRule:2.0.1'
+}
+
+// Таски для Allure отчетов (работают без плагина)
+tasks.register('generateAllureReport', Exec) {
+    dependsOn 'connectedAndroidTest'
+
+    doFirst {
+        // Создаем папку для результатов если ее нет
+        mkdir 'build/allure-results'
+
+        // Копируем результаты тестов
+        copy {
+            from 'build/outputs/androidTest-results/connected'
+            into 'build/allure-results'
+            include '**/*.json'
+        }
+    }
+
+    commandLine 'cmd', '/c', 'allure', 'generate', 'build/allure-results', '-o', 'build/allure-report', '--clean'
+
+    doLast {
+        println "=========================================="
+        println "Allure отчет успешно создан!"
+        println "Расположение: build/allure-report"
+        println "Чтобы открыть отчет, выполните:"
+        println "./gradlew openAllureReport"
+        println "=========================================="
+    }
+}
+
+tasks.register('openAllureReport', Exec) {
+    dependsOn 'generateAllureReport'
+    commandLine 'cmd', '/c', 'allure', 'open', 'build/allure-report'
+
+    doLast {
+        println "Allure отчет открыт в браузере"
+    }
+}
+
+tasks.register('cleanAllure', Delete) {
+    delete 'build/allure-results'
+    delete 'build/allure-report'
+}
+
+// Таска для запуска тестов и генерации отчета
+tasks.register('runAllTestsWithReport') {
+    dependsOn 'connectedAndroidTest', 'generateAllureReport'
+
+    doLast {
+        println "Все тесты выполнены, отчет Allure создан"
+    }
 }
