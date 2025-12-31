@@ -1,0 +1,10 @@
+allure:
+  report:
+    language: ru
+  links:
+    - type: issue
+      name: Баг
+      url: https://jira.example.com/browse/%s
+    - type: tms
+      name: Тест-кейс
+      url: https://testrail.example.com/index.php?/cases/view/%s
