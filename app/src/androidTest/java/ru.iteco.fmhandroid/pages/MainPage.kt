@@ -76,7 +76,7 @@ class MainPage {
     fun logout(): MainPage {
         println("Выход из приложения...")
 
-        // Нажимаем на иконку авторизации (человечек)
+        // Нажимаем на иконку авторизации
         Espresso.onView(ViewMatchers.withId(R.id.authorization_image_button))
             .perform(ViewActions.click())
         Thread.sleep(1000)
