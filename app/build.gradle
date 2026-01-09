@@ -19,12 +19,7 @@ android {
         targetSdkVersion 32
         versionCode 14
         versionName "1.0.0"
-
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-    }
-
-    testOptions {
-        animationsDisabled = true
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
 
     compileOptions {
@@ -32,7 +27,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
-
     kotlinOptions {
         jvmTarget = '1.8'
     }
@@ -99,131 +93,11 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics-ktx'
     implementation 'com.google.firebase:firebase-crashlytics-ktx'
 
-    // Тестирование
-    testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
-
-    // Allure для отчетов
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+    androidTestImplementation 'androidx.test:rules:1.4.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-contrib:3.4.0'
     androidTestImplementation 'io.qameta.allure:allure-kotlin-android:2.4.0'
-    androidTestImplementation 'io.qameta.allure:allure-kotlin-commons:2.4.0'
-    androidTestImplementation 'io.qameta.allure:allure-kotlin-model:2.4.0'
-    androidTestImplementation 'io.qameta.allure:allure-kotlin-junit4:2.4.0'
+    androidTestImplementation 'androidx.test.uiautomator:uiautomator:2.2.0'
 
-    androidTestImplementation('androidx.test.espresso:espresso-core:3.5.1') {
-        exclude group: 'org.hamcrest', module: 'hamcrest'
-    }
-}
-
-// ==================== ALLURE НАСТРОЙКИ ====================
-
-// Определяем задачу для запуска Android тестов
-def androidTestTask = tasks.findByName('connectedAndroidTest') ?:
-        tasks.findByName('connectedDebugAndroidTest') ?:
-                tasks.findByName('connectedCheck')
-
-if (androidTestTask) {
-    // Задача для очистки результатов Allure
-    task cleanAllureResults(type: Delete) {
-        delete 'build/allure-results'
-        delete 'build/reports/allure-report'
-    }
-
-    // Задача для копирования результатов тестов
-    task copyTestResults(type: Copy) {
-        dependsOn androidTestTask
-        from 'build/outputs/androidTest-results/connected'
-        into 'build/allure-results'
-        include '**/*.json'
-        include '**/*.xml'
-
-        doLast {
-            println "✅ Результаты тестов скопированы в build/allure-results"
-        }
-    }
-
-    // Задача для генерации отчета Allure
-    task generateAllureReport(type: Exec) {
-        dependsOn copyTestResults
-
-        def allureResultsDir = new File(project.buildDir, "allure-results").absolutePath
-        def allureReportDir = new File(project.buildDir, "reports/allure-report").absolutePath
-
-        // Проверяем ОС для правильной команды
-        if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
-            commandLine 'cmd', '/c', 'allure', 'generate', allureResultsDir, '-o', allureReportDir, '--clean'
-        } else {
-            commandLine 'allure', 'generate', allureResultsDir, '-o', allureReportDir, '--clean'
-        }
-
-        ignoreExitValue = true
-
-        doLast {
-            if (execResult.exitValue == 0) {
-                println "\n" + "="*50
-                println "🎉 ALLURE ОТЧЕТ УСПЕШНО СОЗДАН!"
-                println "📁 Отчет находится в: file://${allureReportDir}/index.html"
-                println "="*50 + "\n"
-            } else {
-                println "⚠ Не удалось сгенерировать отчет Allure. Установите Allure CLI:"
-                println "   https://github.com/allure-framework/allure2/releases"
-            }
-        }
-    }
-
-    // Задача для открытия отчета
-    task openAllureReport(type: Exec) {
-        dependsOn generateAllureReport
-
-        def allureReportDir = new File(project.buildDir, "reports/allure-report").absolutePath
-
-        if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
-            commandLine 'cmd', '/c', 'allure', 'open', allureReportDir
-        } else {
-            commandLine 'allure', 'open', allureReportDir
-        }
-
-        ignoreExitValue = true
-
-        doLast {
-            if (execResult.exitValue != 0) {
-                println "⚠ Не удалось открыть отчет. Установите Allure CLI"
-            }
-        }
-    }
-
-    // Комбинированная задача
-    task runAllTestsWithAllureReport {
-        dependsOn cleanAllureResults, androidTestTask.name, generateAllureReport
-
-        doLast {
-            println """
-            ==========================================================
-            ✅ ТЕСТИРОВАНИЕ ЗАВЕРШЕНО!
-            
-            📊 Для просмотра отчета Allure:
-            
-            Откройте файл в браузере:
-            file://${project.buildDir.absolutePath}/reports/allure-report/index.html
-            
-            Или установите Allure CLI и выполните:
-            allure open ${project.buildDir.absolutePath}/reports/allure-report
-            ==========================================================
-            """
-        }
-    }
-
-    // Очищаем перед запуском тестов
-    tasks.whenTaskAdded { task ->
-        if (task.name == androidTestTask.name) {
-            task.dependsOn cleanAllureResults
-        }
-    }
-} else {
-    println "⚠ Android тестовая задача не найдена. Allure задачи не будут созданы."
-}
-
-// Убираем любую конфигурацию плагина Allure, чтобы избежать ошибок
-afterEvaluate {
-    println "✅ Конфигурация Allure успешно загружена"
 }
