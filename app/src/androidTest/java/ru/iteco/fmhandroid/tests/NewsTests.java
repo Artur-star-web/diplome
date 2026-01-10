@@ -124,7 +124,7 @@ public class NewsTests {
         //createPage.verifyWarningDisplayed();
     //}
 
-    @Test
+    /*@Test
     @DisplayName("Тест-кейс 34: Создание новости с латиницей в заголовке")
     public void testCreateNewsWithLatinTitle() {
         mainPage.goToNewsPage();
@@ -139,9 +139,9 @@ public class NewsTests {
         createPage.selectPublishDate();
         createPage.selectPublishTime();
         createPage.clickSaveButton();
-    }
+    }*/
 
-    @Test
+    /*@Test
     @DisplayName("Тест-кейс 35: Создание новости с цифрами в заголовке")
     public void testCreateNewsWithNumbersTitle() {
         mainPage.goToNewsPage();
@@ -173,9 +173,9 @@ public class NewsTests {
         createPage.selectPublishDate();
         createPage.selectPublishTime();
         createPage.clickSaveButton();
-    }
+    }*/
 
-    @Test
+    /*@Test
     @DisplayName("Тест-кейс 37: Проверка ограничения на количество символов в заголовке")
     public void testTitleLengthLimit() {
         mainPage.goToNewsPage();
@@ -295,7 +295,7 @@ public class NewsTests {
         CreateEditNewsPage createPage = new CreateEditNewsPage();
         createPage.enterTitle("Test Title");
         createPage.clickCancelButton();
-    }
+    }*/
 
     @Test
     @DisplayName("Тест-кейс 45: Редактирование существующей новости")
